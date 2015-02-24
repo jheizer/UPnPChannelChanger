@@ -20,6 +20,8 @@ To test it: /path/to/script/upnpchannelchanger ip.of.settop.box Channel#
 
 Example: /home/jheizer/upnpchannelchanger 10.0.0.123 9520
 
+To aid in converting you channel data over to the HD specific numbers download and run the channellist script above.  It will return all subscribed channel numbers from your receiver.
+
 
 Special Thanks to https://gist.github.com/markusfisch/6130842  For giving me a great spot to start on this script.
 
