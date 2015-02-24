@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+# Basic Settings
+HOST=$1
+PORT='49200'
+QUERY='upnp/control/EchoSTB2'
+SERVICE='urn:schemas-echostar-com:service:EchoSTB:2'
+
+#Action to wake up a sleeping STB
+WAKE_ACTION='WakeUp'
+WAKE_ARGS='<Tuner>0</Tuner>'
+
+#Action to change the channel
+CHANGE_ACTION='SetChannel'
+CHANGE_ARGS="<Tuner>0</Tuner><Channel>$2</Channel>"
+
+#Disable Inactivity Standby
+INACTIVE_ACTION='InactivityStandby'
+INACTIVE_ARGS='<Enable_disable>Disable</Enable_disable><hours_4_to_8>8</hours_4_to_8>'
+
+upnp_send()
+{
+	local HOST=$1
+	local ACTION=$2
+	local UPNP_ARGS=$3
+
+	# prepare SOAP message
+	local CR=$'\r'
+	local MESSAGE='<?xml version="1.0" encoding="utf-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+<s:Body>
+<u:'${ACTION}' xmlns:u="'${SERVICE}'">'${UPNP_ARGS}'</u:'${ACTION}'>
+</s:Body>
+</s:Envelope>'
+
+	exec 6<>/dev/tcp/$HOST/$PORT || {
+		echo "error: can not connect to $HOST:$PORT" >&2
+		return 1
+	}
+
+	cat <<EOF >&6
+POST /$QUERY HTTP/1.0$CR
+Host: $HOST:$PORT$CR
+SOAPAction: "${SERVICE}#${ACTION}"$CR
+Content-Type: text/xml; charset="utf-8"$CR
+Content-Length: ${#MESSAGE}$CR
+$CR
+$MESSAGE
+EOF
+
+	#Uncomment to debug
+	#cat <&6
+
+	exec 6<&-
+	exec 6>&-
+}
+
+#Wake the STB up
+upnp_send $HOST $WAKE_ACTION $WAKE_ARGS
+
+#Wait for it to wake up
+sleep .7
+
+#Change the channel
+upnp_send $HOST $CHANGE_ACTION $CHANGE_ARGS
+
+sleep .1
+
+#Disabled the inactivity timeout
+upnp_send $HOST $INACTIVE_ACTION $INACTIVE_ARGS
+
+#Sleep to allow the STB time to settle before the tuner tries to access (HD-PVR)
+sleep .1
