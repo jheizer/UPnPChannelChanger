@@ -12,8 +12,7 @@ If your box is not in the list above see: <https://github.com/jheizer/UPnPChanne
   
 ##Steps to use:
 + Download the script
-+ Make it executable
-+ Make sure you are using the HD specific channel number or else you will have the SD feed.
++ Test that sure you are using the HD specific channel number or else you may have the SD feed.  (Dish I have to use the 9XXX channel numbers.)
 + Change mythtv's channel change script to read /path/to/script/upnpchannelchanger ip.of.settop.box
 
 To test it: /path/to/script/upnpchannelchanger ip.of.settop.box Channel#
