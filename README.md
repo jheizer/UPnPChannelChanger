@@ -3,6 +3,7 @@ UPnP Channel Changing script (Designed for MythTV and the DISH Network VIP 211 b
 
 Supported set top boxes:
  + VIP 211
+ + VIP 211k
 
 Set top boxes reported to have no UPnP interface:
 + None yet
