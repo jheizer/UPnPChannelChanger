@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+if  [ $# -eq 0 ] || [ $1 = '-h' ] ; then
+  echo 'Usage: upnpchannelchanger STB_IP Channel#'
+  echo 'Example: upnpchannelchanger 10.0.0.123 9475'
+
+  exit 0
+fi
+
 # Basic Settings
 HOST=$1
 PORT='49200'

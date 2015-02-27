@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 
-#Usage
-if [ $# -eq 0 ] || [ $1 = '-h' ]  ; then
-  echo 'Usage: vip211_channellist STB_IP'
-  echo 'Optional parameters'
-  echo '--curl will return the xml string'
-  echo '--wget will download the file as channels.xml'
-  echo 'Example: vip222k_changer 10.0.0.123 --curl'
+if [ $# -eq 0 ] || [ $1 = '-h' ] ; then
+  echo 'Usage: vip222k_changer STB_IP TUNER Number Channel#'
+  echo 'Tuner 0 = HD Tuner'
+  echo 'Tuner 1 = SD TV2 Tuner'
+  echo 'Example: vip222k_changer 10.0.0.123 0 9475'
 
   exit 0
 fi
+
 
 # Basic Settings
 HOST=$1
@@ -18,8 +17,16 @@ QUERY='upnp/control/EchoSTB2'
 SERVICE='urn:schemas-echostar-com:service:EchoSTB:2'
 
 #Action to wake up a sleeping STB
-CHANNEL_ACTION='GetAuthChannelList'
-CHANNEL_ARGS=''
+WAKE_ACTION='WakeUp'
+WAKE_ARGS='<Tuner>$2</Tuner>'
+
+#Action to change the channel
+CHANGE_ACTION='SetChannel'
+CHANGE_ARGS="<Tuner>$2</Tuner><Channel>$3</Channel>"
+
+#Disable Inactivity Standby
+INACTIVE_ACTION='InactivityStandby'
+INACTIVE_ARGS='<Enable_disable>Disable</Enable_disable><hours_4_to_8>8</hours_4_to_8>'
 
 upnp_send()
 {
@@ -53,19 +60,25 @@ $MESSAGE
 EOF
 
 	#Uncomment to debug
-	#cat <&6
+	cat <&6
 
 	exec 6<&-
 	exec 6>&-
 }
 
-#Request the channel list
-upnp_send $HOST $CHANNEL_ACTION $CHANNEL_ARGS
+#Wake the STB up
+upnp_send $HOST $WAKE_ACTION $WAKE_ARGS
 
-if [ $# -eq 2 ] && [ $2 = "--wget" ] ; then
-  wget -O channels.xml "http://$HOST:49200/AuthChannels.xml"
-elif [ $# -eq 2 ] && [ $2 = "--curl" ] ; then
-  curl "http://$HOST:49200/AuthChannels.xml"
-else
-  echo "Open in a browser - http://$HOST:49200/AuthChannels.xml"
-fi
+#Wait for it to wake up
+sleep .7
+
+#Change the channel
+upnp_send $HOST $CHANGE_ACTION $CHANGE_ARGS
+
+sleep .1
+
+#Disabled the inactivity timeout
+upnp_send $HOST $INACTIVE_ACTION $INACTIVE_ARGS
+
+#Sleep to allow the STB time to settle before the tuner tries to access (HD-PVR)
+sleep .1
