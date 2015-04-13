@@ -7,7 +7,7 @@ Supported set top boxes:
  + VIP 222k (vip222k_changer)
 
 Set top boxes reported to have no UPnP interface:
-+ None yet
++ VIP211 on Canada's Bell ExpressVU
 
   
 If your box is not in the list above see: <https://github.com/jheizer/UPnPChannelChanger/blob/master/NewReceiver.md>
