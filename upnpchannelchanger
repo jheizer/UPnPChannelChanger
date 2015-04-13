@@ -72,6 +72,9 @@ sleep .7
 #Change the channel
 upnp_send $HOST $CHANGE_ACTION $CHANGE_ARGS
 
+#Check for errors
+[[ $recv != *"<New_Channel>$2</New_Channel>"* ]] && exit 1
+
 sleep .1
 
 #Disabled the inactivity timeout
